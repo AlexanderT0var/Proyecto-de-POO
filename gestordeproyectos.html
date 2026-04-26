@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Proyectos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-container" class="overlay">
+        <div class="login-box">
+            <h1>Gestión de Proyectos</h1>
+            <h2 id="login-title">Iniciar Sesión</h2>
+
+            <form id="login-form">
+                <div class="input-group" id="name-group" style="display:none;">
+                    <label>Nombre</label>
+                    <input type="text" id="reg-name" />
+                </div>
+
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="correo@empresa.com" />
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••" />
+                </div>
+
+                <!-- Mensaje de error visible en pantalla -->
+                <div id="login-error" style="
+                    display:none;
+                    background:#fdecea;
+                    color:#c0392b;
+                    border:1px solid #e74c3c;
+                    border-radius:6px;
+                    padding:10px;
+                    margin-bottom:12px;
+                    font-size:0.9rem;
+                "></div>
+
+                <button type="submit" id="btn-auth">Entrar</button>
+            </form>
+
+            <p id="toggle-auth">
+                ¿No hay administrador?
+                <span onclick="app.showRegisterMain()">Crear cuenta principal</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app-container" style="display:none;">
+        <aside class="sidebar">
+            <div class="top-section">
+                <div class="logo">Gestión de Proyectos</div>
+                <nav class="menu">
+                    <ul>
+                        <li onclick="app.view('dashboard', this)" class="active">Dashboard</li>
+                        <li onclick="app.view('proyectos', this)">Proyectos</li>
+                        <li onclick="app.view('tareas', this)">Tareas</li>
+                        <li id="menu-users" onclick="app.view('usuarios', this)" style="display:none;">Usuarios</li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="bottom-section">
+                <div class="user-info">
+                    <p id="active-user-name">Nombre Usuario</p>
+                    <small id="active-user-role">Rol</small>
+                </div>
+                <button class="btn-logout" onclick="app.logout()">Cerrar Sesión</button>
+            </div>
+        </aside>
+        <main class="content" id="main-content"></main>
+    </div>
+
+    <script src="codigo.js"></script>
+</body>
+</html>

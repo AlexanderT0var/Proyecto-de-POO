@@ -72,7 +72,7 @@ const app = {
         const btn      = document.getElementById('btn-auth');
 
         btn.disabled  = true;
-        btn.innerHTML = '<span class="spin"></span>Verificando...';
+        btn.innerHTML = '<span class="spin"></span>Comprobando...';
         app.showLoginError('');
 
         if (state.isRegisteringMainAdmin) {
@@ -225,9 +225,9 @@ app.statusPill = (s) => {
 // Devuelve el pill HTML para el estado de un proyecto
 app.statePill = (s) => {
     const map = {
-        'Activo':      'pill-green',
+        'En progreso':      'pill-green',
         'En Pausa':    'pill-orange',
-        'Finalizado':  'pill-purple',
+        'Terminado':  'pill-purple',
         'Cancelado':   'pill-red'
     };
     return `<span class="pill ${map[s] || 'pill-gray'}">${s || '—'}</span>`;
@@ -239,7 +239,7 @@ app.deadlineBadge = (fechaLimite) => {
     const hoy  = new Date(); hoy.setHours(0,0,0,0);
     const meta = new Date(fechaLimite);
     const diff = Math.ceil((meta - hoy) / (1000 * 60 * 60 * 24));
-    if (diff < 0)  return `<span class="deadline-badge deadline-overdue">⚠ Vencida</span>`;
+    if (diff < 0)  return `<span class="deadline-badge deadline-overdue"> Fuera de tiempo</span>`;
     if (diff <= 3) return `<span class="deadline-badge deadline-soon">⏰ ${diff}d restantes</span>`;
     return `<span class="deadline-badge deadline-ok">📅 ${meta.toLocaleDateString('es-MX')}</span>`;
 };
@@ -279,7 +279,7 @@ app.renderDashboard = async (container) => {
         <div class="stat-card blue">
             <div class="stat-label">Proyectos</div>
             <div class="stat-value">${total}</div>
-            <div class="stat-sub">${activos} activos</div>
+            <div class="stat-sub">${activos} en progreso</div>
         </div>
         <div class="stat-card purple">
             <div class="stat-label">Tareas totales</div>
@@ -294,7 +294,7 @@ app.renderDashboard = async (container) => {
         <div class="stat-card green">
             <div class="stat-label">Completadas</div>
             <div class="stat-value">${doneTasks}</div>
-            <div class="stat-sub">finalizadas</div>
+            <div class="stat-sub">terminadas</div>
         </div>
     </div>`;
 
@@ -317,8 +317,8 @@ app.renderDashboard = async (container) => {
     // Proyectos recientes
     html += `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h3 style="font-size:15px;font-weight:600;color:var(--text)">Proyectos activos</h3>
-        <button class="btn btn-sm" onclick="app.view('proyectos', document.getElementById('nav-proyectos'))">Ver todos →</button>
+        <h3 style="font-size:15px;font-weight:600;color:var(--text)">Proyectos en marcha</h3>
+        <button class="btn btn-sm" onclick="app.view('proyectos', document.getElementById('nav-proyectos'))">Todos →</button>
     </div>`;
 
     if (projects.length === 0) {
@@ -347,7 +347,7 @@ app.renderDashboard = async (container) => {
                     ${techs.slice(0, 3).map(t => `<span class="tech-tag">${t}</span>`).join('')}
                 </div>
                 <div class="progress-wrap">
-                    <div class="progress-label"><span>Avance</span><span>${progress}%</span></div>
+                    <div class="progress-label"><span>Progreso</span><span>${progress}%</span></div>
                     <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
                 </div>
                 <div style="font-size:11px;color:var(--text-dim)">${taskCount} tarea${taskCount !== 1 ? 's' : ''}</div>
@@ -370,19 +370,19 @@ app.renderProjects = (container) => {
     <div class="page-header">
         <div class="page-header-left">
             <h2>Proyectos</h2>
-            <p>Gestión de desarrollos activos e históricos</p>
+            <p>Gestión de desarrollos</p>
         </div>
         <div style="display:flex;gap:8px">
-            ${isAdmin ? `<button class="btn btn-primary" onclick="app.openModalNewProject()">+ Nuevo proyecto</button>` : ''}
+            ${isAdmin ? `<button class="btn btn-primary" onclick="app.openModalNewProject()">+ Añadir proyecto</button>` : ''}
         </div>
     </div>
     <div class="filter-row">
         <input class="filter-input" id="fp-search" placeholder="Buscar proyecto..." oninput="app.filterProjects()" />
         <select class="filter-input" id="fp-estado" onchange="app.filterProjects()">
             <option value="">Todos los estados</option>
-            <option>Activo</option>
+            <option>En progreso</option>
             <option>En Pausa</option>
-            <option>Finalizado</option>
+            <option>Terminado</option>
             <option>Cancelado</option>
         </select>
     </div>
@@ -407,7 +407,7 @@ app.buildProjectsTable = (projects, isAdmin) => {
         const actions   = isAdmin
             ? `<button class="btn btn-sm" onclick="app.openModalEditProject(${p.id})">✏️</button>
                <button class="btn btn-sm btn-danger" onclick="app.deleteProject(${p.id})">🗑️</button>`
-            : `<button class="btn btn-sm" onclick="app.filterTasksByProject(${p.id})">Ver tareas</button>`;
+            : `<button class="btn btn-sm" onclick="app.filterTasksByProject(${p.id})">Tareas</button>`;
         return `<tr>
             <td class="mono">#${p.id}</td>
             <td class="bold">${p.nombre_proyecto}</td>
@@ -428,7 +428,7 @@ app.buildProjectsTable = (projects, isAdmin) => {
         <table class="data-table">
             <thead><tr>
                 <th>ID</th><th>Proyecto</th><th>Tecnologías</th>
-                <th>Estado</th><th>Avance</th><th>Tareas</th><th>Acciones</th>
+                <th>Estado</th><th>Progreso</th><th>Tareas</th><th>Acciones</th>
             </tr></thead>
             <tbody>${rows}</tbody>
         </table>
@@ -450,19 +450,19 @@ app.filterProjects = () => {
 // Modal nuevo proyecto
 app.openModalNewProject = () => {
     app.openModal(`
-        <div class="modal-title">➕ Nuevo proyecto</div>
+        <div class="modal-title">➕ Añadir proyecto</div>
         <div class="field-group"><label>Nombre del proyecto *</label>
-            <input id="m-nombre" placeholder="Ej. Sistema de Inventarios" /></div>
+            <input id="m-nombre" placeholder="" /></div>
         <div class="field-group"><label>Descripción</label>
             <textarea id="m-desc" placeholder="Descripción general del proyecto..."></textarea></div>
         <div class="field-group"><label>Tecnologías</label>
-            <input id="m-techs" placeholder="HTML, CSS, JavaScript" /></div>
+            <input id="m-techs" placeholder="HTML, CSS, Python" /></div>
         <div class="field-group"><label>Fecha de inicio</label>
             <input type="date" id="m-fecha" /></div>
         <div class="field-group"><label>Estado</label>
             <select id="m-estado">
-                <option>Activo</option><option>En Pausa</option>
-                <option>Finalizado</option><option>Cancelado</option>
+                <option>En progreso</option><option>En Pausa</option>
+                <option>Terminado</option><option>Cancelado</option>
             </select></div>
         <div class="modal-footer">
             <button class="btn" onclick="app.closeModal()">Cancelar</button>
@@ -506,7 +506,7 @@ app.openModalEditProject = (id) => {
             <input id="m-techs" value="${p.tecnologias || ''}" /></div>
         <div class="field-group"><label>Estado</label>
             <select id="m-estado">
-                ${['Activo','En Pausa','Finalizado','Cancelado'].map(s =>
+                ${['En progreso','En Pausa','Terminado','Cancelado'].map(s =>
                     `<option ${p.estado === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select></div>
         <div class="modal-footer">
@@ -566,10 +566,10 @@ app.renderTasks = (container) => {
     <div class="page-header">
         <div class="page-header-left">
             <h2>Tareas</h2>
-            <p>Tablero Kanban de actividades</p>
+            <p>Tablero de tareas</p>
         </div>
         <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="app.openModalNewTask()">+ Nueva tarea</button>
+            <button class="btn btn-primary" onclick="app.openModalNewTask()">+ Añadir tarea</button>
         </div>
     </div>
     <div class="filter-row">
@@ -677,13 +677,13 @@ app.openModalNewTask = () => {
         `<option value="${u.id}">${u.nombre_completo}</option>`).join('');
 
     app.openModal(`
-        <div class="modal-title">➕ Nueva tarea</div>
+        <div class="modal-title">➕ Añadir tarea</div>
         <div class="field-group"><label>Proyecto *</label>
             <select id="m-proj">${projOpts}</select></div>
         <div class="field-group"><label>Desarrollador asignado *</label>
             <select id="m-user">${devOpts || '<option value="">Sin desarrolladores</option>'}</select></div>
         <div class="field-group"><label>Descripción *</label>
-            <textarea id="m-desc" placeholder="Instrucción detallada de la actividad..."></textarea></div>
+            <textarea id="m-desc" placeholder="Instrucción detallada de la tarea..."></textarea></div>
         <div class="field-group"><label>Estatus</label>
             <select id="m-status">
                 <option>Pendiente</option><option>En Progreso</option><option>Completado</option>
@@ -788,7 +788,7 @@ app.renderUsers = (container) => {
             <h2>Usuarios</h2>
             <p>Control de acceso y roles del sistema</p>
         </div>
-        <button class="btn btn-primary" onclick="app.openModalNewUser()">+ Nuevo usuario</button>
+        <button class="btn btn-primary" onclick="app.openModalNewUser()">+ Crear usuario</button>
     </div>
     <div class="users-grid">`;
 
@@ -820,7 +820,7 @@ app.renderUsers = (container) => {
 
 app.openModalNewUser = () => {
     app.openModal(`
-        <div class="modal-title">➕ Nuevo usuario</div>
+        <div class="modal-title">➕ Crear usuario</div>
         <div class="field-group"><label>Nombre completo *</label>
             <input id="m-nombre" placeholder="Nombre y apellido" /></div>
         <div class="field-group"><label>Correo electrónico *</label>

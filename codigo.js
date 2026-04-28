@@ -12,7 +12,6 @@
  *  6. CRUD Proyectos
  *  7. CRUD Tareas
  *  8. CRUD Usuarios
- *  9. Reportes PDF
  * 10. Utilidades (Modal, Toast, Helpers)
  */
 
@@ -374,7 +373,6 @@ app.renderProjects = (container) => {
             <p>Gestión de desarrollos activos e históricos</p>
         </div>
         <div style="display:flex;gap:8px">
-            <button class="btn btn-sm" onclick="app.exportProjectsPDF()">📄 Exportar PDF</button>
             ${isAdmin ? `<button class="btn btn-primary" onclick="app.openModalNewProject()">+ Nuevo proyecto</button>` : ''}
         </div>
     </div>
@@ -571,7 +569,6 @@ app.renderTasks = (container) => {
             <p>Tablero Kanban de actividades</p>
         </div>
         <div style="display:flex;gap:8px">
-            <button class="btn btn-sm" onclick="app.exportTasksPDF()">📄 Exportar PDF</button>
             <button class="btn btn-primary" onclick="app.openModalNewTask()">+ Nueva tarea</button>
         </div>
     </div>
@@ -866,82 +863,4 @@ app.deleteUser = async (id) => {
     state.users = state.users.filter(u => u.id !== id);
     app.renderUsers(document.getElementById('main-content'));
     app.toast('Usuario eliminado.');
-};
-
-// ═══════════════════════════════════════════════
-// 9. REPORTES PDF
-// ═══════════════════════════════════════════════
-app.exportProjectsPDF = () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFontSize(16);
-    doc.setTextColor(44, 62, 80);
-    doc.text('ProjectTrack — Reporte de Proyectos', 14, 18);
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX')} — Usuario: ${state.currentUser.nombre_completo}`, 14, 26);
-    doc.line(14, 29, 196, 29);
-
-    const rows = app.visibleProjects().map(p => [
-        '#' + p.id,
-        p.nombre_proyecto.substring(0, 36),
-        (p.tecnologias || '—').substring(0, 20),
-        p.estado || '—',
-        app.calculateProgress(p.id) + '%',
-        state.tasks.filter(t => t.id_proyecto === p.id).length
-    ]);
-
-    doc.autoTable({
-        head: [['ID', 'Proyecto', 'Tecnologías', 'Estado', 'Avance', 'Tareas']],
-        body: rows,
-        startY: 33,
-        styles: { fontSize: 10, cellPadding: 4 },
-        headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [245, 248, 255] }
-    });
-
-    doc.save(`ProjectTrack_Proyectos_${new Date().toISOString().split('T')[0]}.pdf`);
-    app.toast('PDF de proyectos generado ✓');
-};
-
-app.exportTasksPDF = () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFontSize(16);
-    doc.setTextColor(44, 62, 80);
-    doc.text('ProjectTrack — Reporte de Tareas', 14, 18);
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX')} — Usuario: ${state.currentUser.nombre_completo}`, 14, 26);
-    doc.line(14, 29, 196, 29);
-
-    const isAdmin = ['Admin Principal', 'Administrador'].includes(state.currentUser.rol);
-    const tasks   = isAdmin ? state.tasks : state.tasks.filter(t => t.id_usuario === state.currentUser.id);
-
-    const rows = tasks.map(t => {
-        const p = state.projects.find(x => x.id === t.id_proyecto);
-        const u = state.users.find(x => x.id === t.id_usuario);
-        return [
-            '#' + t.id,
-            (p ? p.nombre_proyecto : '—').substring(0, 28),
-            t.descripcion.substring(0, 32),
-            t.estatus,
-            u ? u.nombre_completo.substring(0, 20) : '—',
-            t.fecha_limite ? new Date(t.fecha_limite).toLocaleDateString('es-MX') : '—'
-        ];
-    });
-
-    doc.autoTable({
-        head: [['ID', 'Proyecto', 'Descripción', 'Estatus', 'Asignado a', 'Deadline']],
-        body: rows,
-        startY: 33,
-        styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [139, 92, 246], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 245, 255] }
-    });
-
-    doc.save(`ProjectTrack_Tareas_${new Date().toISOString().split('T')[0]}.pdf`);
-    app.toast('PDF de tareas generado ✓');
 };
